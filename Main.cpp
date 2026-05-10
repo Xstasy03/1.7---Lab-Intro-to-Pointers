@@ -1,61 +1,55 @@
-#include <iostream>
-
-class Account
+class Checking : public Account
 {
-protected:
-    char accountName[50];
-
-    int* accountId;
-    int* transactionLimit;
-    int* overdraftFee;
-
-    double accountBalance;
-    double accountInterestRate;
+private:
+    char accountNickname[50];
 
 public:
-    Account(const char name[],
+    // Overloaded constructor
+    Checking(const char name[],
+        const char nickname[],
         int id,
         int limit,
         int overdraft,
         double balance,
         double interestRate)
+        : Account(name, id, limit, overdraft, balance, interestRate)
     {
         int i = 0;
-        while (name[i] != '\0' && i < 49)
+        while (nickname[i] != '\0' && i < 49)
         {
-            accountName[i] = name[i];
+            accountNickname[i] = nickname[i];
             i++;
         }
-        accountName[i] = '\0';
-
-        accountId = new int(id > 0 ? id : 1);
-        transactionLimit = new int(limit > 0 ? limit : 1);
-        overdraftFee = new int(overdraft > 0 ? overdraft : 0);
-
-        accountBalance = balance;
-        accountInterestRate = interestRate;
+        accountNickname[i] = '\0';
     }
 
-    virtual ~Account()
+    // Getter
+    const char* GetNickname()
     {
-        delete accountId;
-        delete transactionLimit;
-        delete overdraftFee;
+        return accountNickname;
     }
 
-    const char* GetName() { return accountName; }
-    int GetId() { return *accountId; }
-    int GetTransactionLimit() { return *transactionLimit; }
-    int GetOverdraftFee() { return *overdraftFee; }
-    double GetBalance() { return accountBalance; }
-    double GetInterestRate() { return accountInterestRate; }
+    // Override Withdraw
+    void Withdraw(double* amount) override
+    {
+        accountBalance -= *amount;
 
-    virtual void Withdraw(double* amount) = 0;
-    virtual void Deposit(double* amount) = 0;
-    virtual void AddInterest() = 0;
+        // apply overdraft fee only if balance goes below 0
+        if (accountBalance < 0)
+        {
+            accountBalance -= *overdraftFee;
+        }
+    }
+
+    // Override Deposit
+    void Deposit(double* amount) override
+    {
+        accountBalance += *amount;
+    }
+
+    // Override AddInterest
+    void AddInterest() override
+    {
+        accountBalance += accountBalance * accountInterestRate;
+    }
 };
-
-int main()
-{
-    return 0;
-}
